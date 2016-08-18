@@ -1,4 +1,5 @@
-#!/usr/local/bin/Rscript --no-init-file
+#!/usr/bin/Rscript --no-init-file
+# Load the required libraries
 library(astro)
 library(FITSio)
 library(magicaxis)
@@ -10,10 +11,12 @@ library(Cairo)
 # input arguments
 inputargs = commandArgs(TRUE)
 stub = inputargs[1]
-extension = inputargs[2]
-#out = inputargs[3]
+#extension = inputargs[2]
+outdir = inputargs[2]
 
 inp=paste(stub,".fits",sep="")
+
+for (extension in 1:16){
 #
 dat = readFITS(inp,hdu=as.numeric(extension))
 
@@ -37,9 +40,9 @@ if(filter=="Y") {abv=0.618}
 if(filter=="J") {abv=0.937}
 if(filter=="H") {abv=1.384}
 if(filter=="Ks") {abv=1.839}
-out=paste(stub,"_",filter,"_",extension,".fits",sep="")
-catname=paste(stub,"_",filter,"_",extension,".cat",sep="")
-imag=paste(stub,"_",filter,"_",extension,".png",sep="")
+out=paste(outdir,"/",stub,"_",filter,"_",extension,".fits",sep="")
+catname=paste(outdir,"/",stub,"_",filter,"_",extension,".cat",sep="")
+imag=paste(outdir,"/",stub,"_",filter,"_",extension,".png",sep="")
 
 # AB-magnitude ZP
 zp.new = zp - (2.5*log10(1/t)) - (ext*(am-1)) + abv
@@ -63,7 +66,7 @@ write.fitskey("FILTER", value=filter, file=out,hdu=1)
 #setup SExtractor and psfex
 sex = "/usr/bin/sex"
 psfex = "/usr/bin/psfex"
-source("/home/sdriver/waves/makepsf.r")
+source("/lscratch/mark/makepsf.r")
 
 # create sex/psfex input files
 if(!file.exists("config.psf.sex")){system(paste(sex, "-dd > config.psf.sex"))}
@@ -137,3 +140,4 @@ ra=rachip + (cd1_1 * (naxis1/2-raoff) + cd1_2 * (naxis2/2-decoff))/cos(decchip/5
 
 # output useful info
 cat(inp,out,rachip,decchip,ra,dec,filter,t,am,ext,naxis1,naxis2,zp,pixmod,skylev,skynois,origsee,psfaccept,psftotal,psfFWHM,back,rms,thresh,"\n")
+}
